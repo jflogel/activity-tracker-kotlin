@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/3.3.7-1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+</head>
+<body>
+
+<div id="app" class="container">
+    <nav class="navbar">
+        <ul class="nav navbar-nav nav-pills">
+            <li v-bind:class="classObject()">
+                <router-link to="/activities/list">All</router-link>
+            </li>
+            <li v-bind:class="classObject('running')">
+                <router-link to="/activities/list?activity=running">Running</router-link>
+            </li>
+            <li v-bind:class="classObject('core')">
+                <router-link to="/activities/list?activity=core">Core</router-link>
+            </li>
+            <li v-bind:class="classObject('swimming')">
+                <router-link to="/activities/list?activity=swimming">Swimming</router-link>
+            </li>
+            <li v-bind:class="classObject('weights')">
+                <router-link to="/activities/list?activity=weights">Weights</router-link>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <router-link to="/activities/add" class="btn btn-default">Add</router-link>
+            </li>
+        </ul>
+    </nav>
+    <router-view :key="$route.fullPath"></router-view>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://unpkg.com/vue@2.3.4/dist/vue.js"></script>
+<script type="text/javascript" src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+<script type="text/javascript" src="/javascript/main.js"></script>
+</body>
+</html>

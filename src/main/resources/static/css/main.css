@@ -1,0 +1,28 @@
+.row:nth-child(odd){
+  background-color:#ddd;
+}
+.row:nth-child(even){
+  background-color:#efefef;
+}
+a .glyphicon {
+    padding: 0 5px 0 0;
+    cursor: pointer;
+}
+a.edit {
+    color:steelblue;
+}
+a.delete {
+    color:crimson;
+}
+a {
+    color:#aaa;
+}
+.btn {
+    margin-right: 10px;
+}
+
+/* bootstrap overrides */
+.navbar-nav li a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
