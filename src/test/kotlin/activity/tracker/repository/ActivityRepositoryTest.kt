@@ -27,8 +27,8 @@ class ActivityRepositoryTest {
     @Autowired
     lateinit var activityRepository: ActivityRepositoryImpl
 
-    val distance = Measurement(1750, "miles")
-    val timeDuration = Measurement(13, "hours")
+    val distance = Measurement(1750f, "miles")
+    val timeDuration = Measurement(13f, "hours")
     val activity1 = ActivityModel(LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0).toEpoch(), 1, distance, timeDuration, null)
     val activity2 = ActivityModel(LocalDateTime.of(2017, Month.JANUARY, 4, 0, 0, 0).toEpoch(), 2, distance, timeDuration, null)
     val activity3 = ActivityModel(LocalDateTime.of(2017, Month.JANUARY, 2, 0, 0, 0).toEpoch(), 3, distance, timeDuration, null)

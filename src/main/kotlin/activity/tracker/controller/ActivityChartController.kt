@@ -2,8 +2,7 @@ package activity.tracker.controller
 
 import activity.tracker.Activity
 import activity.tracker.db.model.ActivityModel
-import activity.tracker.utilities.toEpoch
-import activity.tracker.utilities.zoneId
+import activity.tracker.utilities.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -15,7 +14,9 @@ import java.time.format.DateTimeFormatter
 
 
 @RestController
-class ActivityChartController(@Autowired val repository: activity.tracker.repository.ActivityRepository) {
+class ActivityChartController(@Autowired val repository: activity.tracker.repository.ActivityRepository,
+                              @Autowired val weeklyStatsCreator: WeeklyStatsCreator,
+                              @Autowired val yearlyStatsCreator: YearlyStatsCreator) {
 
     @RequestMapping("/data/activities/chart")
     fun chart(@RequestParam(required = false) activity: String?): ActivityChartDto {
@@ -26,16 +27,30 @@ class ActivityChartController(@Autowired val repository: activity.tracker.reposi
 
         val days = buildListOfAllDays(numberOfDaysForRecentActivity)
         val activitiesGroupedByDate = latestActivities.groupBy { convertEpochToFormattedDate(it.datetime) }
-
         val summaries: List<ActivityDaySummaryDto> = days.fold(mutableListOf(), { accum, curr ->
             val activitiesForDate = activitiesGroupedByDate.getOrDefault(curr, emptyList())
-            val summaryForDate: ActivityDaySummaryDto = activitiesForDate.fold(ActivityDaySummaryDto(curr, 0, 0, 0, 0), { accum, x ->
+            val summaryForDate: ActivityDaySummaryDto = activitiesForDate.fold(ActivityDaySummaryDto(curr, 0f, 0f, 0f, 0f), { accum, x ->
                 accum.add(x)
             })
             accum.add(summaryForDate)
             accum
         })
-        return ActivityChartDto(summaries, getLegendValues())
+
+        if (activityId != null) {
+            val activityDescription = Activity.getById(activityId).description ?: ""
+            val weeklyStats = weeklyStatsCreator.getWeeklyStats(activityId)
+            val yearStats = yearlyStatsCreator.getYearStats(activityId)
+
+            val activityStats = ActivityStatsDto(
+                    "${weeklyStats.weeklyTotal.value.formatNumber()} ${weeklyStats.weeklyTotal.unit}",
+                    "${yearStats.weeklyAverage.value.formatNumber()} ${yearStats.weeklyAverage.unit}",
+                    "${yearStats.yearTotal.value.formatNumber()} ${yearStats.yearTotal.unit}"
+            )
+            val activities: List<ActivityDetailDto> = yearStats.allActivities.map { ActivityDetailDto(it.id ?: "", activityDescription, it.datetime, it.time_duration?.value ?: 0f, it.distance?.value, it.distance?.unit ?: "") }
+            return ActivityChartDto(summaries, getLegendValues(), activityStats, activities)
+        }
+
+        return ActivityChartDto(summaries, getLegendValues(), null, emptyList())
     }
 
     private fun buildListOfAllDays(days: Long): List<String> {
@@ -56,8 +71,14 @@ class ActivityChartController(@Autowired val repository: activity.tracker.reposi
     }
 }
 
-data class ActivityChartDto(val summaries: List<ActivityDaySummaryDto>, val legendValues: List<String>)
-data class ActivityDaySummaryDto(val date: String, val running: Int, val core: Int, val swimming: Int, val weights: Int) {
+data class ActivityChartDto(val summaries: List<ActivityDaySummaryDto>,
+                            val legendValues: List<String>,
+                            val activityStats: ActivityStatsDto?,
+                            val activities: List<ActivityDetailDto>)
+
+data class ActivityStatsDto(val totalForWeek: String, val average: String, val totalForYear: String)
+data class ActivityDetailDto(val id: String, val activity: String, val date: Long, val time_duration: Float, val distance: Float?, val distance_units: String?)
+data class ActivityDaySummaryDto(val date: String, val running: Float, val core: Float, val swimming: Float, val weights: Float) {
     fun add(activityModel: ActivityModel): ActivityDaySummaryDto {
         return when (activityModel.activity_id) {
             1 -> ActivityDaySummaryDto(this.date, this.running + activityModel.time_duration!!.value, this.core, this.swimming, this.weights)
