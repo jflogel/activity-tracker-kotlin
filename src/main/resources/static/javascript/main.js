@@ -132,7 +132,9 @@ const ActivitiesEdit = { template:
             errors: null,
             activities: [],
             model: {
+                activity: 'Running',
                 date: this.defaultDate(),
+                distance_units: 'miles',
                 time_duration: 0
             }
         };
