@@ -123,7 +123,7 @@ const ActivitiesEdit = { template:
             </div>
             <div class="form-group">
                 <button class="btn btn-default col-sm-1 col-sm-offset-1" type='submit' v-on:click="saveData">Save</button>
-                <router-link to="/activities/list" class="btn btn-default col-sm-1">Cancel</router-link>
+                <router-link v-bind:to="createCancelLink(model)" class="btn btn-default col-sm-1">Cancel</router-link>
             </div>
         </form>
     </div>`,
@@ -175,13 +175,19 @@ const ActivitiesEdit = { template:
                 } else if (response.errors) {
                     self.errors = response.errors;
                 } else {
-                    self.$router.push('/activities/list');
+                    self.$router.push('/activities/list?activity=' + self.model.activity);
                 }
             }
             var requestBody = Object.assign({}, this.model, {
                 date: moment(this.model.date, 'YYYY-MM-DDTHH:mm').unix()
             });
             xhr.send(JSON.stringify(requestBody));
+         },
+         createCancelLink: function (model) {
+            if (model.id && model.activity) {
+                return '/activities/list?activity=' + model.activity;
+            }
+            return '/activities/list';
          }
     }
 }
