@@ -7,6 +7,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
+import java.util.*
 
 
 fun LocalDateTime.toEpoch(): Long {
@@ -22,5 +23,5 @@ fun LocalDateTime.startOfDay(): LocalDateTime {
 
 fun firstDayOfYear() = LocalDate.now(zoneId()).minusWeeks(1).with(TemporalAdjusters.firstDayOfYear())
 fun firstDayOfMonth() = LocalDate.now(zoneId()).minusWeeks(1).with(TemporalAdjusters.firstDayOfMonth())
-fun firstDayOfWeek() = LocalDate.now(zoneId()).minusWeeks(1).with(WeekFields.SUNDAY_START.firstDayOfWeek)
+fun firstDayOfWeek() = LocalDate.now(zoneId()).with(WeekFields.of(Locale.US).dayOfWeek(), 1)
 fun weekOfYear() = LocalDate.now(zoneId()).dayOfYear / 7f

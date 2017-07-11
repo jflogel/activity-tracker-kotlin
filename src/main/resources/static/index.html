@@ -12,21 +12,21 @@
 <div id="app" class="container">
     <nav class="navbar">
         <ul class="nav navbar-nav nav-pills">
-            <li v-bind:class="classObject()">
-                <router-link to="/activities/list">All</router-link>
-            </li>
-            <li v-bind:class="classObject('running')">
-                <router-link to="/activities/list?activity=running">Running</router-link>
-            </li>
-            <li v-bind:class="classObject('core')">
-                <router-link to="/activities/list?activity=core">Core</router-link>
-            </li>
-            <li v-bind:class="classObject('swimming')">
-                <router-link to="/activities/list?activity=swimming">Swimming</router-link>
-            </li>
-            <li v-bind:class="classObject('weights')">
-                <router-link to="/activities/list?activity=weights">Weights</router-link>
-            </li>
+            <router-link tag="li" to="/activities/list">
+                <a>All</a>
+            </router-link>
+            <router-link tag="li" to="/activities/list?activity=running">
+                <a>Running</a>
+            </router-link>
+            <router-link tag="li" to="/activities/list?activity=core">
+                <a>Core</a>
+            </router-link>
+            <router-link tag="li" to="/activities/list?activity=swimming">
+                <a>Swimming</a>
+            </router-link>
+            <router-link tag="li" to="/activities/list?activity=weights">
+                <a>Weights</a>
+            </router-link>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li>

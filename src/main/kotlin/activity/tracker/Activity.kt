@@ -3,7 +3,9 @@ package activity.tracker
 import activity.tracker.Goal.COUNT
 import activity.tracker.Goal.DISTANCE
 import activity.tracker.Goal.DURATION
+import com.fasterxml.jackson.annotation.JsonFormat
 
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 enum class Activity(val id: Int?, val description: String?, val goalType: String, val desiredUnit: String) {
     UNKNOWN(null, null, "", ""),
     EMPTY(null, "", "", ""),

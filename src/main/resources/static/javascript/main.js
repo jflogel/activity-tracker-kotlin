@@ -11,12 +11,12 @@ const ActivitiesList = {
                 <td>{{activity.time_duration}} minutes</td>
                 <td>{{activity.distance}} {{activity.distance_units}}</td>
                 <td>
-                    <a class="edit" v-bind:href="'/activities/edit/' + activity.id" title='Edit'>
+                    <router-link v-bind:to="'/activities/edit/' + activity.id" class="edit" title="Edit">
                         <span class="glyphicon glyphicon-pencil"></span>
-                    </a>
-                    <a class="delete" v-bind:href="'/activities/delete/' + activity.id" title='Delete'>
+                    </router-link>
+                    <button class="delete" v-on:click="deleteActivity(activity)" title='Delete'>
                         <span class="glyphicon glyphicon-trash"></span>
-                    </a>
+                    </button>
                 </td>
             </tr>
         </table>
@@ -61,6 +61,19 @@ const ActivitiesList = {
             chart.draw(view, options);
        }
        xhr.send()
+     },
+     deleteActivity: function (activity) {
+        var xhr = new XMLHttpRequest()
+        var self = this
+        xhr.open('DELETE', '/activity/delete?id=' + activity.id)
+        xhr.onload = function () {
+            if (xhr.status == 200) {
+                self.fetchData();
+            } else {
+                console.log('something went wrong: ', xhr.response)
+            }
+        }
+        xhr.send();
      }
     },
     filters: {
@@ -69,30 +82,122 @@ const ActivitiesList = {
         }
       }
 }
-const ActivitiesAdd = { template: '<div>bar</div>' }
+const ActivitiesEdit = { template:
+    `<div>
+        <ul v-if="errors" class="list-unstyled alert alert-danger">
+            <li v-for="error in errors">{{error}}</li>
+        </ul>
+        <form class="form-horizontal" v-on:submit.prevent v-bind:action="model.id ? '/activities/edit/' + model.id : '/activities/add'" method='POST'>
+            <div class="form-group">
+                <label class="control-label col-sm-1" for="date">Date:</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id='date' name='date' type='datetime-local' placeholder='mm/dd/yyyy, hh:mm AM' v-model="model.date">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-1" for='activity'>Activity:</label>
+                <div class="col-sm-3">
+                    <select class="form-control col-sm-1" id='activity' v-model="model.activity" name='activity'>
+                        <option v-for="activity in activities" v-bind:value="activity.description">{{activity.description}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-1" for='duration'>Duration:</label>
+                <div class="col-sm-3">
+                    <input class="form-control col-sm-1" id='duration' name='duration' min='0' type='number' placeholder='minutes' v-model="model.time_duration">
+                </div>
+                <div class="col-sm-1">minutes</div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-1" for='distance'>Distance:</label>
+                <div class="col-sm-3">
+                    <input class="form-control col-sm-1" id='distance' name='distance' type='text' v-model="model.distance">
+                </div>
+                <div class="col-sm-1">
+                    <select class="form-control col-sm-1" v-model="model.distance_units" name='distance_units'>
+                        <option value='miles'>miles</option>
+                        <option value='meters'>meters</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default col-sm-1 col-sm-offset-1" type='submit' v-on:click="saveData">Save</button>
+                <router-link to="/activities/list" class="btn btn-default col-sm-1">Cancel</router-link>
+            </div>
+        </form>
+    </div>`,
+    data: function() {
+        return {
+            errors: null,
+            activities: [],
+            model: {
+                date: this.defaultDate(),
+                time_duration: 0
+            }
+        };
+    },
+    created: function() {
+        this.fetchData();
+    },
+    methods: {
+        formatDate: function(date) {
+            return moment.unix(date).format('YYYY-MM-DDTHH:mm')
+        },
+        defaultDate: function() {
+            return moment().format('YYYY-MM-DDT00:00');
+        },
+        fetchData: function () {
+           const activity = this.$route.params.id || '';
+           var xhr = new XMLHttpRequest()
+           var self = this
+           xhr.open('GET', '/activity/edit?activity=' + activity)
+           xhr.onload = function () {
+                const json = JSON.parse(xhr.responseText);
+                self.activities = json.activities;
+                if (json.model) {
+                    self.model = Object.assign({}, json.model, {
+                        date: self.formatDate(json.model.date)
+                    });
+                }
+           }
+           xhr.send()
+         },
+         saveData: function (event) {
+            var xhr = new XMLHttpRequest()
+            var self = this
+            xhr.open('POST', '/activity/save')
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onload = function () {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status >= 400) {
+                    self.errors = [response.message];
+                } else if (response.errors) {
+                    self.errors = response.errors;
+                } else {
+                    self.$router.push('/activities/list');
+                }
+            }
+            var requestBody = Object.assign({}, this.model, {
+                date: moment(this.model.date, 'YYYY-MM-DDTHH:mm').unix()
+            });
+            xhr.send(JSON.stringify(requestBody));
+         }
+    }
+}
 
 const routes = [
   { path: '/', component: ActivitiesList },
   { path: '/activities/list', component: ActivitiesList },
-  { path: '/activities/add', component: ActivitiesAdd }
+  { path: '/activities/add', component: ActivitiesEdit },
+  { path: '/activities/edit/:id', component: ActivitiesEdit }
 ]
 
 const router = new VueRouter({
-  routes
+  routes,
+  linkExactActiveClass: 'active'
 })
 
 const app = new Vue({
-    router,
-    methods: {
-        classObject: function (val) {
-            const routeActivity = this.$route.query.activity;
-            if (routeActivity && routeActivity == val) {
-                return 'active';
-            }
-            if ((!routeActivity || routeActivity == '') && !val) {
-                return 'active';
-            }
-            return '';
-        }
-    }
+    router
 }).$mount('#app')
