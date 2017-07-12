@@ -2,7 +2,7 @@ package activity.tracker.controller
 
 import activity.tracker.Activity
 import activity.tracker.db.model.MeasurementSum
-import activity.tracker.db.model.convertToGoalUnit
+import activity.tracker.db.model.convertToGoalTypeAndDesiredUnit
 import activity.tracker.repository.ActivityRepository
 import activity.tracker.utilities.firstDayOfWeek
 import activity.tracker.utilities.toEpoch
@@ -21,7 +21,7 @@ class WeeklyStatsCreatorImpl(@Autowired val repository: ActivityRepository): Wee
         val activity = Activity.getById(activityId)
 
         val weeklyTotal = activities.fold(MeasurementSum(0f, activity.desiredUnit), { acc, model ->
-            val activityGoalValue = convertToGoalUnit(model, activity.goalType)
+            val activityGoalValue = convertToGoalTypeAndDesiredUnit(model, activity).value
             MeasurementSum(acc.value + activityGoalValue, acc.unit)
         })
         return WeeklyStats(weeklyTotal)

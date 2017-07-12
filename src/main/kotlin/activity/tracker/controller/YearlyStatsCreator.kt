@@ -3,7 +3,7 @@ package activity.tracker.controller
 import activity.tracker.Activity
 import activity.tracker.db.model.ActivityModel
 import activity.tracker.db.model.MeasurementSum
-import activity.tracker.db.model.convertToGoalUnit
+import activity.tracker.db.model.convertToGoalTypeAndDesiredUnit
 import activity.tracker.repository.ActivityRepository
 import activity.tracker.utilities.firstDayOfYear
 import activity.tracker.utilities.toEpoch
@@ -23,7 +23,7 @@ class YearlyStatsCreatorImpl(@Autowired val repository: ActivityRepository): Yea
         val activity = Activity.getById(activityId)
 
         val yearTotal = activities.fold(MeasurementSum(0f, activity.desiredUnit), { acc, model ->
-            MeasurementSum(acc.value + convertToGoalUnit(model, activity.goalType), acc.unit)
+            MeasurementSum(acc.value + convertToGoalTypeAndDesiredUnit(model, activity).value, acc.unit)
         })
         val weeklyAverage = MeasurementSum(yearTotal.value / weekOfYear(), yearTotal.unit)
 

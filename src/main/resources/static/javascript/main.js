@@ -118,6 +118,7 @@ const ActivitiesEdit = { template:
                     <select class="form-control col-sm-1" v-model="model.distance_units" name='distance_units'>
                         <option value='miles'>miles</option>
                         <option value='meters'>meters</option>
+                        <option value='yards'>yards</option>
                     </select>
                 </div>
             </div>
@@ -177,7 +178,7 @@ const ActivitiesEdit = { template:
                 } else if (response.errors) {
                     self.errors = response.errors;
                 } else {
-                    self.$router.push('/activities/list?activity=' + self.model.activity);
+                    self.$router.push('/activities/list?activity=' + self.model.activity.toLowerCase());
                 }
             }
             var requestBody = Object.assign({}, this.model, {
