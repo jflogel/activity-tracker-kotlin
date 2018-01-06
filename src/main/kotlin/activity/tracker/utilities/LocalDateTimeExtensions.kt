@@ -21,7 +21,6 @@ fun LocalDateTime.startOfDay(): LocalDateTime {
     return this.truncatedTo(ChronoUnit.DAYS)
 }
 
-fun firstDayOfYear() = LocalDate.now(zoneId()).minusWeeks(1).with(TemporalAdjusters.firstDayOfYear())
-fun firstDayOfMonth() = LocalDate.now(zoneId()).minusWeeks(1).with(TemporalAdjusters.firstDayOfMonth())
+fun firstDayOfYear() = LocalDate.now(zoneId()).with(TemporalAdjusters.firstDayOfYear())
 fun firstDayOfWeek() = LocalDate.now(zoneId()).with(WeekFields.of(Locale.US).dayOfWeek(), 1)
 fun weekOfYear() = LocalDate.now(zoneId()).dayOfYear / 7f
