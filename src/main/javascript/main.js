@@ -1,3 +1,6 @@
+import moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
+
 function formatDuration(value, unit) {
     return moment.duration(value, unit).format('h:mm:ss');
 }
