@@ -1,3 +1,17 @@
+function formatDuration(value, unit) {
+    return moment.duration(value, unit).format('h:mm:ss');
+}
+
+function parseDurationToSeconds(duration) {
+    var parts = duration.split(":");
+    if (parts.length === 2) {
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    } else if (parts.length === 3) {
+        return parseInt(parts[0]) * 60 * 60 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+    }
+    return parseInt(parts[0]);
+}
+
 const ActivitiesList = {
     template: `<div>
         <div v-if="activityStats"> Week total: {{activityStats.totalForWeek}}</div>
@@ -8,7 +22,7 @@ const ActivitiesList = {
             <tr v-for="activity in activities" class="row">
                 <td format="moment(date).format ~ dddd, M/D, h:mm a">{{activity.date | formatDate}}</td>
                 <td>{{activity.activity}}</td>
-                <td>{{activity.time_duration}} minutes</td>
+                <td>{{activity.time_duration | formatDuration(activity.time_duration_units)}}</td>
                 <td>{{activity.distance}} {{activity.distance_units}}</td>
                 <td>
                     <router-link v-bind:to="'/activities/edit/' + activity.id" class="edit" title="Edit">
@@ -79,7 +93,8 @@ const ActivitiesList = {
     filters: {
         formatDate: function (epoch) {
             return moment.unix(epoch).format('dddd, M/D, h:mm a');
-        }
+        },
+        formatDuration: formatDuration
       }
 }
 const ActivitiesEdit = { template:
@@ -105,9 +120,8 @@ const ActivitiesEdit = { template:
             <div class="form-group">
                 <label class="control-label col-sm-1" for='duration'>Duration:</label>
                 <div class="col-sm-3">
-                    <input class="form-control col-sm-1" id='duration' name='duration' min='0' type='number' placeholder='minutes' v-model="model.time_duration">
+                    <input class="form-control col-sm-1" id='duration' name='duration' min='0' type='string' placeholder='hh:mm:ss' v-model="model.time_duration">
                 </div>
-                <div class="col-sm-1">minutes</div>
             </div>
             <div class="form-group">
                 <label class="control-label col-sm-1" for='distance'>Distance:</label>
@@ -135,8 +149,7 @@ const ActivitiesEdit = { template:
             model: {
                 activity: 'Running',
                 date: this.defaultDate(),
-                distance_units: 'miles',
-                time_duration: 0
+                distance_units: 'miles'
             }
         };
     },
@@ -147,6 +160,7 @@ const ActivitiesEdit = { template:
         formatDate: function(date) {
             return moment.unix(date).format('YYYY-MM-DDTHH:mm')
         },
+        formatDuration: formatDuration,
         defaultDate: function() {
             return moment().format('YYYY-MM-DDT00:00');
         },
@@ -160,7 +174,8 @@ const ActivitiesEdit = { template:
                 self.activities = json.activities;
                 if (json.model) {
                     self.model = Object.assign({}, json.model, {
-                        date: self.formatDate(json.model.date)
+                        date: self.formatDate(json.model.date),
+                        time_duration: self.formatDuration(json.model.time_duration, json.model.time_duration_units),
                     });
                 }
            }
@@ -182,7 +197,9 @@ const ActivitiesEdit = { template:
                 }
             }
             var requestBody = Object.assign({}, this.model, {
-                date: moment(this.model.date, 'YYYY-MM-DDTHH:mm').unix()
+                date: moment(this.model.date, 'YYYY-MM-DDTHH:mm').unix(),
+                time_duration: parseDurationToSeconds(this.model.time_duration),
+                time_duration_units: 'seconds'
             });
             xhr.send(JSON.stringify(requestBody));
          },

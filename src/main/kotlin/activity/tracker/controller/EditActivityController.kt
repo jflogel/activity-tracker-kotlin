@@ -27,6 +27,7 @@ class EditActivityController(@Autowired val activityRepository: ActivityReposito
                         Activity.getById(activityModel.activity_id).description ?: "",
                         activityModel.datetime,
                         activityModel.time_duration?.value ?: 0f,
+                        activityModel.time_duration?.unit ?: "",
                         activityModel.distance?.value,
                         activityModel.distance?.unit
                 ))
@@ -46,7 +47,8 @@ class EditActivityController(@Autowired val activityRepository: ActivityReposito
                 request.date,
                 Activity.getByDescription(request.activity).id!!,
                 createDistanceMeasurement(request),
-                Measurement(request.time_duration!!.toFloat(), "minutes"),
+                Measurement(request.time_duration!!.toFloat(),
+                        request.time_duration_units ?: "seconds"),
                 request.id
         )
         activityRepository.save(activityModel)
@@ -77,8 +79,8 @@ class EditActivityController(@Autowired val activityRepository: ActivityReposito
 data class ActivityRequest(val date: Long,
                            val activity: String?,
                            val time_duration: Int?,
+                           val time_duration_units: String?,
                            val distance: Float?,
-                           val distance_units: String?,
-                           val id: String?) {
-    constructor() : this(0, null, null, null, null, null)
+                           val distance_units: String?, val id: String?) {
+    constructor() : this(0, null, null, null, null, null, null)
 }

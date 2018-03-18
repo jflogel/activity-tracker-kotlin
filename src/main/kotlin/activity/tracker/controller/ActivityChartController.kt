@@ -2,7 +2,10 @@ package activity.tracker.controller
 
 import activity.tracker.Activity
 import activity.tracker.db.model.ActivityModel
-import activity.tracker.utilities.*
+import activity.tracker.utilities.convertToMinutes
+import activity.tracker.utilities.formatNumber
+import activity.tracker.utilities.toEpoch
+import activity.tracker.utilities.zoneId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -46,7 +49,7 @@ class ActivityChartController(@Autowired val repository: activity.tracker.reposi
                     "${yearStats.weeklyAverage.value.formatNumber()} ${yearStats.weeklyAverage.unit}",
                     "${yearStats.yearTotal.value.formatNumber()} ${yearStats.yearTotal.unit}"
             )
-            val activities: List<ActivityDetailDto> = yearStats.allActivities.map { ActivityDetailDto(it.id ?: "", activityDescription, it.datetime, it.time_duration?.value ?: 0f, it.distance?.value, it.distance?.unit ?: "") }
+            val activities: List<ActivityDetailDto> = yearStats.allActivities.map { ActivityDetailDto(it.id ?: "", activityDescription, it.datetime, it.time_duration?.value ?: 0f, it.time_duration?.unit ?: "", it.distance?.value, it.distance?.unit ?: "") }
             return ActivityChartDto(summaries, getLegendValues(), activityStats, activities)
         }
 
@@ -77,14 +80,15 @@ data class ActivityChartDto(val summaries: List<ActivityDaySummaryDto>,
                             val activities: List<ActivityDetailDto>)
 
 data class ActivityStatsDto(val totalForWeek: String, val average: String, val totalForYear: String)
-data class ActivityDetailDto(val id: String, val activity: String, val date: Long, val time_duration: Float, val distance: Float?, val distance_units: String?)
+data class ActivityDetailDto(val id: String, val activity: String, val date: Long, val time_duration: Float, val time_duration_units: String, val distance: Float?, val distance_units: String?)
 data class ActivityDaySummaryDto(val date: String, val running: Float, val core: Float, val swimming: Float, val weights: Float) {
     fun add(activityModel: ActivityModel): ActivityDaySummaryDto {
+        val durationInMinutes = convertToMinutes(activityModel.time_duration!!)
         return when (activityModel.activity_id) {
-            1 -> ActivityDaySummaryDto(this.date, this.running + activityModel.time_duration!!.value, this.core, this.swimming, this.weights)
-            2 -> ActivityDaySummaryDto(this.date, this.running, this.core + activityModel.time_duration!!.value, this.swimming, this.weights)
-            3 -> ActivityDaySummaryDto(this.date, this.running, this.core, this.swimming + activityModel.time_duration!!.value, this.weights)
-            4 -> ActivityDaySummaryDto(this.date, this.running, this.core, this.swimming, this.weights + activityModel.time_duration!!.value)
+            1 -> ActivityDaySummaryDto(this.date, this.running + durationInMinutes, this.core, this.swimming, this.weights)
+            2 -> ActivityDaySummaryDto(this.date, this.running, this.core + durationInMinutes, this.swimming, this.weights)
+            3 -> ActivityDaySummaryDto(this.date, this.running, this.core, this.swimming + durationInMinutes, this.weights)
+            4 -> ActivityDaySummaryDto(this.date, this.running, this.core, this.swimming, this.weights + durationInMinutes)
             else -> this
         }
     }
