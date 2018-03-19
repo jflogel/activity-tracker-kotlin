@@ -8,22 +8,25 @@ class DurationHelperTest {
 
     @Test
     fun convertMinutesToMinutes() {
-        val minutes = convertToMinutes(Measurement(50F, "minutes"))
+        val minutes = convertDuration(Measurement(50F, "minutes"), "minutes")
 
-        assertEquals(50F, minutes)
+        assertEquals(50F, minutes.value)
+        assertEquals("minutes", minutes.unit)
     }
 
     @Test
     fun convertSecondsToMinutes() {
-        val minutes = convertToMinutes(Measurement(350F, "seconds"))
+        val minutes = convertDuration(Measurement(350F, "seconds"), "minutes")
 
-        assertEquals(5.83, minutes.toDouble(), 0.01)
+        assertEquals(5.83, minutes.value.toDouble(), 0.01)
+        assertEquals("minutes", minutes.unit)
     }
 
     @Test
     fun convertInvalidUnitToMinutes() {
-        val minutes = convertToMinutes(Measurement(350F, "other"))
+        val minutes = convertDuration(Measurement(350F, "other"), "minutes")
 
-        assertEquals(0F, minutes)
+        assertEquals(0F, minutes.value)
+        assertEquals("minutes", minutes.unit)
     }
 }

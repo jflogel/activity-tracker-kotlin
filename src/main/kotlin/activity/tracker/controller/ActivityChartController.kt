@@ -2,7 +2,7 @@ package activity.tracker.controller
 
 import activity.tracker.Activity
 import activity.tracker.db.model.ActivityModel
-import activity.tracker.utilities.convertToMinutes
+import activity.tracker.utilities.convertDuration
 import activity.tracker.utilities.formatNumber
 import activity.tracker.utilities.toEpoch
 import activity.tracker.utilities.zoneId
@@ -83,7 +83,7 @@ data class ActivityStatsDto(val totalForWeek: String, val average: String, val t
 data class ActivityDetailDto(val id: String, val activity: String, val date: Long, val time_duration: Float, val time_duration_units: String, val distance: Float?, val distance_units: String?)
 data class ActivityDaySummaryDto(val date: String, val running: Float, val core: Float, val swimming: Float, val weights: Float) {
     fun add(activityModel: ActivityModel): ActivityDaySummaryDto {
-        val durationInMinutes = convertToMinutes(activityModel.time_duration!!)
+        val durationInMinutes = convertDuration(activityModel.time_duration!!, "minutes").value
         return when (activityModel.activity_id) {
             1 -> ActivityDaySummaryDto(this.date, this.running + durationInMinutes, this.core, this.swimming, this.weights)
             2 -> ActivityDaySummaryDto(this.date, this.running, this.core + durationInMinutes, this.swimming, this.weights)

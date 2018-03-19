@@ -4,6 +4,7 @@ import activity.tracker.Activity
 import activity.tracker.Goal.COUNT
 import activity.tracker.Goal.DISTANCE
 import activity.tracker.Goal.DURATION
+import activity.tracker.utilities.convertDuration
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
@@ -31,7 +32,7 @@ private fun getDuration(measurement: Measurement?, activity: Activity): Measurem
     if (measurement == null) {
         return Measurement(0f, activity.desiredUnit)
     }
-    return measurement
+    return convertDuration(measurement, "minutes")
 }
 
 private fun convertToDesiredDistanceUnit(measurement: Measurement?, activity: Activity): Measurement {
