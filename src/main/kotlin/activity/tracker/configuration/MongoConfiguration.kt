@@ -1,6 +1,5 @@
 package activity.tracker.configuration
 
-import com.mongodb.Mongo
 import com.mongodb.MongoClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -14,15 +13,13 @@ open class MongoConfiguration {
     @Value("\${database.name}")
     lateinit var databaseName: String
 
-    @Bean
-    @Throws(Exception::class)
-    open fun mongo(): Mongo {
-        return MongoClient("localhost")
-    }
+    @Value("\${mongo.host}")
+    lateinit var mongoHost: String
 
     @Bean
     @Throws(Exception::class)
     open fun mongoTemplate(): MongoTemplate {
-        return MongoTemplate(mongo(), databaseName)
+        val mongoClient = MongoClient(mongoHost)
+        return MongoTemplate(mongoClient, databaseName)
     }
 }
